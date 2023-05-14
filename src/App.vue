@@ -11,12 +11,12 @@
       </div>
       <div class="toDo__taskList">
         <ul class="toDo__taskWrapper" v-for="task in tasksList" :key="task">
-          <li class="toDo__taskName" >
+          <li class="toDo__taskName" :id="task">
             <div class="toDo__taskContent">
               <input type="checkbox" class="toDo__check">
               <span class="toDo__taskText">{{ task }}</span>
             </div>
-            <button class="toDo__remove">Remove</button>
+            <button class="toDo__remove" @click="removeTask">Remove</button>
           </li>
         </ul>
       </div>
@@ -35,18 +35,25 @@ export default {
     const addedTask = ref(false);
     const tasksList = ref([])
 
+    //add new task
     function addTask() {
-      if(taskName.value) {
+      if(taskName.value && !tasksList.value.includes(taskName.value)) {
         tasksList.value.unshift(taskName.value);
         taskName.value = '';
       }
     }
+
+    //remove the task
+    function removeTask(event) {
+      tasksList.value = tasksList.value.filter(item => item !== event.target.parentElement.id)
+      }
 
     return {
       taskName,
       addedTask,
       addTask,
       tasksList,
+      removeTask
     }
   }
 }

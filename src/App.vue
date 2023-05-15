@@ -34,7 +34,8 @@ const isChecked = ref(false);
 
 //add new task
 function addTask() {
-  if (taskName.value) {
+  let isAdded = tasksList.value.some(item => item.content === taskName.value);
+  if (taskName.value && !isAdded) {
     tasksList.value.unshift({
       content: taskName.value,
       checked: false

@@ -3,18 +3,19 @@
     <div class="toDo__container">
       <h1 class="toDo__title">Simple To-do list</h1>
       <div class="toDo__taskInfo">
-        <h2 class="toDo__desc">Your tasks: <span class="toDo__selectedTask">0</span> / <span class="toDo__count">{{tasksList.length}}</span></h2>
+        <h2 class="toDo__desc">Your tasks: <span class="toDo__selectedTask">{{ count }}</span> / <span
+            class="toDo__count">{{ tasksList.length }}</span></h2>
       </div>
       <div class="toDo__form">
         <input type="text" class="toDo__taskDesc" v-model="taskName" @keyup.enter="addTask">
         <button class="toDo__addBtn" @click="addTask">Add</button>
       </div>
       <div class="toDo__taskList">
-        <ul class="toDo__taskWrapper" v-for="task in tasksList" :key="task">
-          <li class="toDo__taskName" :id="task">
+        <ul class="toDo__taskWrapper" v-for="task in tasksList" :key="task.content">
+          <li class="toDo__taskName" :id="task.content">
             <div class="toDo__taskContent">
-              <input type="checkbox" class="toDo__check">
-              <span class="toDo__taskText">{{ task }}</span>
+              <input type="checkbox" @change="setCheck" class="toDo__check">
+              <span class="toDo__taskText" :class="{'toDo__taskText--done': task.checked}">{{ task.content }}</span>
             </div>
             <button class="toDo__remove" @click="removeTask">Remove</button>
           </li>
@@ -24,45 +25,67 @@
   </div>
 </template>
 
-<script>
-import {ref} from 'vue';
+<script setup>
+import {ref, computed} from 'vue';
 
-export default {
-  name: 'App',
-  components: {},
-  setup() {
-    const taskName = ref();
-    const addedTask = ref(false);
-    const tasksList = ref([])
+const taskName = ref();
+const tasksList = ref([]);
+const isChecked = ref(false);
 
-    //add new task
-    function addTask() {
-      if(taskName.value && !tasksList.value.includes(taskName.value)) {
-        tasksList.value.unshift(taskName.value);
-        taskName.value = '';
+//add new task
+function addTask() {
+  if (taskName.value) {
+    tasksList.value.unshift({
+      content: taskName.value,
+      checked: false
+    });
+    taskName.value = '';
+  }
+}
+
+//remove the task
+function removeTask(event) {
+  tasksList.value = tasksList.value.filter(item => item.content !== event.target.parentElement.id)
+}
+
+//change checked value of task
+function setCheck(event) {
+  console.log(event.target.checked)
+  if (event.target.checked) {
+    isChecked.value = true
+    for (let item of tasksList.value) {
+      if (item.content === event.target.nextElementSibling.textContent) {
+        item.checked = true;
       }
     }
-
-    //remove the task
-    function removeTask(event) {
-      tasksList.value = tasksList.value.filter(item => item !== event.target.parentElement.id)
+  } else {
+    isChecked.value = false
+    for (let item of tasksList.value) {
+      if (item.content === event.target.nextElementSibling.textContent) {
+        item.checked = false;
       }
-
-    return {
-      taskName,
-      addedTask,
-      addTask,
-      tasksList,
-      removeTask
     }
   }
 }
+
+//count of checked tasks
+const count = computed(() => {
+  let checkCount = 0;
+  for (let item of tasksList.value) {
+    if (item.checked) {
+      checkCount++
+    }
+  }
+  return checkCount;
+});
+
 </script>
 
 <style lang="scss">
 body {
   margin: 0;
 }
+
 .toDo {
   max-width: 700px;
   width: 100%;
@@ -129,6 +152,12 @@ body {
       outline: 1px solid red;
       color: red;
       cursor: pointer;
+    }
+  }
+
+  &__taskText {
+    &--done {
+      text-decoration: line-through;
     }
   }
 }

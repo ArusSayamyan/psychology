@@ -92,9 +92,11 @@ body {
   background: #ccc;
   display: flex;
   justify-content: center;
-  align-items: center;
   margin: 0 auto;
   padding: 20px;
+  height: 100vh;
+  box-sizing: border-box;
+  overflow: auto;
 
   &__container {
     width: 100%;

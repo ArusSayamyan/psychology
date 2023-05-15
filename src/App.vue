@@ -14,7 +14,7 @@
         <ul class="toDo__taskWrapper" v-for="task in tasksList" :key="task.content">
           <li class="toDo__taskName" :id="task.content">
             <div class="toDo__taskContent">
-              <input type="checkbox" @change="setCheck" class="toDo__check">
+              <input type="checkbox" @change="setCheck" :checked="task.checked" class="toDo__check">
               <span class="toDo__taskText" :class="{'toDo__taskText--done': task.checked}">{{ task.content }}</span>
             </div>
             <button class="toDo__remove" @click="removeTask">Remove</button>
@@ -26,7 +26,7 @@
 </template>
 
 <script setup>
-import {ref, computed} from 'vue';
+import {ref, computed, onMounted} from 'vue';
 
 const taskName = ref();
 const tasksList = ref([]);
@@ -34,28 +34,31 @@ const isChecked = ref(false);
 
 //add new task
 function addTask() {
-  if (taskName.value) {
+  let isAdded = tasksList.value.some(item => item.content === taskName.value);
+  if (taskName.value && !isAdded) {
     tasksList.value.unshift({
       content: taskName.value,
       checked: false
     });
     taskName.value = '';
+    localStorage.setItem('task', JSON.stringify(tasksList.value))
   }
 }
 
 //remove the task
 function removeTask(event) {
   tasksList.value = tasksList.value.filter(item => item.content !== event.target.parentElement.id)
+  localStorage.setItem('task', JSON.stringify(tasksList.value))
 }
 
 //change checked value of task
 function setCheck(event) {
-  console.log(event.target.checked)
   if (event.target.checked) {
     isChecked.value = true
     for (let item of tasksList.value) {
       if (item.content === event.target.nextElementSibling.textContent) {
         item.checked = true;
+        localStorage.setItem('task', JSON.stringify(tasksList.value))
       }
     }
   } else {
@@ -63,6 +66,7 @@ function setCheck(event) {
     for (let item of tasksList.value) {
       if (item.content === event.target.nextElementSibling.textContent) {
         item.checked = false;
+        localStorage.setItem('task', JSON.stringify(tasksList.value))
       }
     }
   }
@@ -78,7 +82,9 @@ const count = computed(() => {
   }
   return checkCount;
 });
-
+onMounted(() => {
+  tasksList.value = JSON.parse(localStorage.getItem('task'))
+})
 </script>
 
 <style lang="scss">
